@@ -5,7 +5,6 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.setZ(30);
-//camera.position.z = 5;
 
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
@@ -15,16 +14,8 @@ const geometry = new THREE.TorusGeometry( 10, 3, 16, 100 );
 const material = new THREE.MeshStandardMaterial( { color: 0xFF6347 } );
 const torus = new THREE.Mesh( geometry, material );
 scene.add( torus );
-
-//const pointLight = new THREE.PointLight(0xffffff);
-//pointLight.position.set(5,5,5);
-
 const ambientLight = new THREE.AmbientLight(0xffffff);
-
 scene.add( ambientLight );
-
-//const lightHelper = new THREE.PointLightHelper(pointLight);
-//scene.add(lightHelper);
 
 const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -32,18 +23,8 @@ const controls = new OrbitControls(camera, renderer.domElement);
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 
-function onMouseClick(event) {
-  event.preventDefault();
-
-  // Calculate mouse position in normalized device coordinates
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  // Raycasting to check if objects are intersected
-  raycaster.setFromCamera(mouse, camera);
-
-  const intersects = raycaster.intersectObjects(scene.children);
-
+// Function to change the color of intersected objects
+function changeObjectColor(intersects) {
   if (intersects.length > 0) {
     const selectedObject = intersects[0].object;
     if (selectedObject.type === 'Mesh') {
@@ -53,7 +34,37 @@ function onMouseClick(event) {
   }
 }
 
-window.addEventListener('click', onMouseClick, false);
+// Function to handle both click and touch events
+function onPointer(event) {
+  event.preventDefault();
+
+  let clientX, clientY;
+
+  if (event.type === 'click') {
+    clientX = event.clientX;
+    clientY = event.clientY;
+  } else if (event.type === 'touchstart') {
+    clientX = event.touches[0].clientX;
+    clientY = event.touches[0].clientY;
+  }
+
+  // Calculate mouse or touch position in normalized device coordinates
+  const mouse = new THREE.Vector2();
+  mouse.x = (clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(clientY / window.innerHeight) * 2 + 1;
+
+  // Raycasting to check if objects are intersected
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  changeObjectColor(intersects);
+}
+
+// Event listeners for both click and touch events
+window.addEventListener('click', onPointer, false);
+window.addEventListener('touchstart', onPointer, { passive: false });
 
 function addStar(){
   const geometry = new THREE.SphereGeometry(0.25, 24, 24);

@@ -66,7 +66,7 @@ function addStar(){
   scene.add(star);
 }
 
-Array(200).fill().forEach(addStar); 
+//Array(200).fill().forEach(addStar); 
 
 // Function to add a new type of visual element - particles
 function addParticles() {
